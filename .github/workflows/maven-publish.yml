@@ -60,7 +60,12 @@ jobs:
           # 导入密钥
           echo "Importing GPG key..."
           gpg --version
-          gpg --batch --yes --pinentry-mode loopback --passphrase "${{ secrets.GPG_PASSPHRASE }}" --import private-key.asc
+          # 使用更详细的导入命令，确保私钥正确导入
+          gpg --batch --yes --pinentry-mode loopback --passphrase "${{ secrets.GPG_PASSPHRASE }}" --import-options import-show --import private-key.asc
+          
+          # 尝试使用不同的导入方式
+          echo "Trying alternative import method..."
+          gpg --batch --yes --import private-key.asc
           
           # 清理临时文件
           rm private-key.asc
