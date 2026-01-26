@@ -1,0 +1,38 @@
+# GitHub 仓库需要配置以下 Secrets：
+# 1. MAVEN_USERNAME - Sonatype OSSRH 用户名
+# 2. MAVEN_PASSWORD - Sonatype OSSRH 密码
+# 3. GPG_PRIVATE_KEY - GPG 私钥（完整的 ASCII  armored 格式）
+# 4. GPG_PASSPHRASE - GPG 私钥密码
+
+name: Maven Central Repo Deployment
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  publish-central:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout Git Repo
+        uses: actions/checkout@v4
+
+      - name: Set up Apache Maven Central
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+          server-id: central
+          server-username: MAVEN_USERNAME
+          server-password: MAVEN_PASSWORD
+          gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
+          gpg-passphrase: GPG_PASSPHRASE
+
+      - name: Publish to Apache Maven Central
+        run: mvn deploy
+        env:
+          MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSWORD }}
