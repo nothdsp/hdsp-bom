@@ -33,4 +33,4 @@ jobs:
           CENTRAL_USERNAME: ${{ secrets.SERVER_USERNAME }}
           CENTRAL_PASSWORD: ${{ secrets.SERVER_PASSWORD }}
           # 注意：不设置 GPG_PASSPHRASE，因为密钥无密码
-        run: mvn -B -Prelease -DskipTests -Dmaven.javadoc.skip=true clean deploy
+        run: mvn -B -Prelease -DskipTests -Dmaven.javadoc.skip=true -Dserver.username=${CENTRAL_USERNAME} -Dserver.password=${CENTRAL_PASSWORD} clean deploy
