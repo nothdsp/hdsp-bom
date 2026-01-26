@@ -21,16 +21,16 @@ jobs:
 
       - name: Import GPG Private Key
         env:
-          GPG_PRIVATE_KEY:  $ {{ secrets.GPG_PRIVATE_KEY }}
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
         run: |
-          echo " $ GPG_PRIVATE_KEY" | gpg --batch --import
-          KEY_ID= $ (gpg --list-secret-keys --keyid-format LONG --with-colons | awk -F: ' $ 1 == "sec" { print  $ 5; exit }')
-          echo "Imported GPG key ID:  $ KEY_ID"
-          gpg --batch --import-ownertrust <<< " $ KEY_ID:6:"
+          echo "$GPG_PRIVATE_KEY" | gpg --batch --import
+          KEY_ID=$(gpg --list-secret-keys --keyid-format LONG --with-colons | awk -F: '$1 == "sec" { print $5; exit }')
+          echo "Imported GPG key ID: $KEY_ID"
+          gpg --batch --import-ownertrust <<< "$KEY_ID:6:"
 
       - name: Publish to Maven Central
         env:
-          CENTRAL_USERNAME:  $ {{ secrets.SERVER_USERNAME }}
-          CENTRAL_PASSWORD:  $ {{ secrets.SERVER_PASSWORD }}
+          CENTRAL_USERNAME: ${{ secrets.SERVER_USERNAME }}
+          CENTRAL_PASSWORD: ${{ secrets.SERVER_PASSWORD }}
           # 注意：不设置 GPG_PASSPHRASE，因为密钥无密码
-        run: mvn -Prelease -DskipTests -Dmaven.javadoc.skip=true clean deploy
+        run: mvn -B -Prelease -DskipTests -Dmaven.javadoc.skip=true clean deploy
