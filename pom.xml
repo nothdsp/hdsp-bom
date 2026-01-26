@@ -4,14 +4,14 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>io.github.ihdsp</groupId>
+    <groupId>io.github.nothdsp</groupId>
     <artifactId>hdsp-bom</artifactId>
     <version>1.0.0</version>
     <packaging>pom</packaging>
 
     <name>hdsp-bom</name>
     <description>hdsp bom</description>
-    <url>https://github.com/ihdsp/hdsp-bom.git</url>
+    <url>https://github.com/nothdsp/hdsp-bom.git</url>
 
     <licenses>
         <license>
@@ -28,9 +28,9 @@
     </developers>
 
     <scm>
-        <connection>scm:git:https://github.com/ihdsp/hdsp-bom.git</connection>
-        <developerConnection>scm:git:https://github.com/ihdsp/hdsp-bom.git</developerConnection>
-        <url>https://github.com/ihdsp/hdsp-bom.git</url>
+        <connection>scm:git:https://github.com/nothdsp/hdsp-bom.git</connection>
+        <developerConnection>scm:git:https://github.com/nothdsp/hdsp-bom.git</developerConnection>
+        <url>https://github.com/nothdsp/hdsp-bom.git</url>
         <tag>HEAD</tag>
     </scm>
 

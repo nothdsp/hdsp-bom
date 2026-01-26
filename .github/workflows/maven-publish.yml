@@ -6,6 +6,8 @@ name: Maven Publish
 # 3. GPG_PRIVATE_KEY - GPG 私钥（完整的 ASCII  armored 格式）
 # 4. GPG_PASSPHRASE - GPG 私钥密码
 
+# 代码仓库地址：https://github.com/nothdsp/hdsp-bom.git
+
 on:
   push:
     branches:
