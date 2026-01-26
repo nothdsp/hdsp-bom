@@ -19,7 +19,7 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
           server-id: central
-          server-username: ${{ secrets.MAVEN_USERNAME  }}
+          server-username: ${{ secrets.SERVER_USERNAME  }}
           server-password: ${{ secrets.SERVER_PASSWORD }}
           gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
           gpg-passphrase: ${{ secrets.GPG_PASSPHRASE }}
