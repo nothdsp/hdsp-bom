@@ -19,24 +19,18 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Import GPG Key (for signing)
+      - name: Import GPG Private Key
         env:
           GPG_PRIVATE_KEY:  $ {{ secrets.GPG_PRIVATE_KEY }}
-          GPG_PASSPHRASE:  $ {{ secrets.GPG_PASSPHRASE }}
         run: |
-          # 导入 GPG 私钥
           echo " $ GPG_PRIVATE_KEY" | gpg --batch --import
-          # 可选：信任该密钥（避免签名时警告）
           KEY_ID= $ (gpg --list-secret-keys --keyid-format LONG --with-colons | awk -F: ' $ 1 == "sec" { print  $ 5; exit }')
-          echo "Imported GPG key:  $ KEY_ID"
+          echo "Imported GPG key ID:  $ KEY_ID"
           gpg --batch --import-ownertrust <<< " $ KEY_ID:6:"
 
-      - name: Publish to Apache Maven Central
+      - name: Publish to Maven Central
         env:
-          # Sonatype Central 凭据（必须！）
-          CENTRAL_USERNAME:  $ {{ secrets.SERVER_USERNAME   }}
+          CENTRAL_USERNAME:  $ {{ secrets.SERVER_USERNAME }}
           CENTRAL_PASSWORD:  $ {{ secrets.SERVER_PASSWORD }}
-          # GPG passphrase（如果密钥有密码）
-          GPG_PASSPHRASE:  $ {{ secrets.GPG_PASSPHRASE }}
-        run: |
-          mvn -Prelease -DskipTests clean deploy
+          # 注意：不设置 GPG_PASSPHRASE，因为密钥无密码
+        run: mvn -Prelease -DskipTests -Dmaven.javadoc.skip=true clean deploy
