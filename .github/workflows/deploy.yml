@@ -18,20 +18,32 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: '17'
-          server-id: central
-          server-username: ${{ secrets.SERVER_USERNAME }}
-          server-password: ${{ secrets.SERVER_PASSWORD }}
 
       - name: Import GPG Private Key
         env:
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
         run: |
           echo "$GPG_PRIVATE_KEY" | gpg --batch --import
-          # 可选：打印密钥信息用于调试
-          gpg --list-secret-keys --keyid-format LONG
-
+          FINGERPRINT=$(gpg --list-secret-keys --keyid-format LONG --with-colons | awk -F: '$1 == "fpr" { print $10; exit }')
+          echo "Imported GPG fingerprint: $FINGERPRINT"
+          gpg --batch --import-ownertrust <<< "$FINGERPRINT:6:"
       - name: Publish to Maven Central
         env:
           CENTRAL_USERNAME: ${{ secrets.SERVER_USERNAME }}
           CENTRAL_PASSWORD: ${{ secrets.SERVER_PASSWORD }}
-        run: mvn -Prelease -DskipTests -Dmaven.javadoc.skip=true clean deploy
+        run: |
+          # Create temporary settings.xml with server configuration
+          cat > settings.xml << EOF
+          <settings>
+            <servers>
+              <server>
+                <id>central</id>
+                <username>$CENTRAL_USERNAME</username>
+                <password>$CENTRAL_PASSWORD</password>
+              </server>
+            </servers>
+          </settings>
+          EOF
+          
+          # Run Maven deploy with the custom settings
+          mvn -B -Prelease -DskipTests -Dmaven.javadoc.skip=true -s settings.xml clean deploy
