@@ -33,4 +33,19 @@ jobs:
           CENTRAL_USERNAME: ${{ secrets.SERVER_USERNAME }}
           CENTRAL_PASSWORD: ${{ secrets.SERVER_PASSWORD }}
           # 注意：不设置 GPG_PASSPHRASE，因为密钥无密码
-        run: mvn -B -Prelease -DskipTests -Dmaven.javadoc.skip=true -Dserver.username=${CENTRAL_USERNAME} -Dserver.password=${CENTRAL_PASSWORD} clean deploy
+        run: |
+          # Create temporary settings.xml with server configuration
+          cat > settings.xml << EOF
+          <settings>
+            <servers>
+              <server>
+                <id>central</id>
+                <username>$CENTRAL_USERNAME</username>
+                <password>$CENTRAL_PASSWORD</password>
+              </server>
+            </servers>
+          </settings>
+          EOF
+          
+          # Run Maven deploy with the custom settings
+          mvn -B -Prelease -DskipTests -Dmaven.javadoc.skip=true -s settings.xml clean deploy
