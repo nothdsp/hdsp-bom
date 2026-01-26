@@ -1,4 +1,5 @@
 name: Maven Central Repo Deployment
+
 on:
   push:
     branches:
@@ -9,20 +10,33 @@ jobs:
   publish-central:
     runs-on: ubuntu-latest
     steps:
-
       - name: Checkout Git Repo
         uses: actions/checkout@v4
 
-      - name: Set up Apache Maven Central
+      - name: Set up Java
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '17'
-          server-id: central
-          server-username: ${{ secrets.SERVER_USERNAME  }}
-          server-password: ${{ secrets.SERVER_PASSWORD }}
-          gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
-          gpg-passphrase: ${{ secrets.GPG_PASSPHRASE }}
+
+      - name: Import GPG Key (for signing)
+        env:
+          GPG_PRIVATE_KEY:  $ {{ secrets.GPG_PRIVATE_KEY }}
+          GPG_PASSPHRASE:  $ {{ secrets.GPG_PASSPHRASE }}
+        run: |
+          # 导入 GPG 私钥
+          echo " $ GPG_PRIVATE_KEY" | gpg --batch --import
+          # 可选：信任该密钥（避免签名时警告）
+          KEY_ID= $ (gpg --list-secret-keys --keyid-format LONG --with-colons | awk -F: ' $ 1 == "sec" { print  $ 5; exit }')
+          echo "Imported GPG key:  $ KEY_ID"
+          gpg --batch --import-ownertrust <<< " $ KEY_ID:6:"
 
       - name: Publish to Apache Maven Central
-        run: mvn deploy -Prelease
+        env:
+          # Sonatype Central 凭据（必须！）
+          CENTRAL_USERNAME:  $ {{ secrets.SERVER_USERNAME   }}
+          CENTRAL_PASSWORD:  $ {{ secrets.SERVER_PASSWORD }}
+          # GPG passphrase（如果密钥有密码）
+          GPG_PASSPHRASE:  $ {{ secrets.GPG_PASSPHRASE }}
+        run: |
+          mvn -Prelease -DskipTests clean deploy
