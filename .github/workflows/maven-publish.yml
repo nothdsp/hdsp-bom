@@ -43,15 +43,50 @@ jobs:
 
       - name: Import GPG key
         run: |
+          # 检查密钥是否存在
+          if [ -z "${{ secrets.GPG_PRIVATE_KEY }}" ]; then
+            echo "ERROR: GPG_PRIVATE_KEY secret is not set"
+            exit 1
+          fi
+          
+          # 写入密钥文件
           echo "${{ secrets.GPG_PRIVATE_KEY }}" > private-key.asc
-          # 使用 --batch 和 --yes 确保非交互式导入
+          
+          # 检查文件内容
+          echo "Key file length: $(wc -c < private-key.asc)"
+          head -n 5 private-key.asc
+          tail -n 5 private-key.asc
+          
+          # 导入密钥
+          echo "Importing GPG key..."
+          gpg --version
           gpg --batch --yes --pinentry-mode loopback --passphrase "${{ secrets.GPG_PASSPHRASE }}" --import private-key.asc
+          
+          # 清理临时文件
           rm private-key.asc
+          
           # 详细列出所有密钥信息，用于调试
           echo "=== GPG Secret Keys ==="
           gpg --list-secret-keys --keyid-format LONG
           echo "=== GPG Public Keys ==="
           gpg --list-keys --keyid-format LONG
+          
+          # 检查是否有密钥
+          SECRET_KEY_COUNT=$(gpg --list-secret-keys --keyid-format LONG | grep -c '^sec')
+          if [ "$SECRET_KEY_COUNT" -eq 0 ]; then
+            echo "ERROR: No secret keys found after import"
+            exit 1
+          fi
+          
+          # 设置默认密钥
+          DEFAULT_KEY=$(gpg --list-secret-keys --keyid-format LONG | grep -E '^sec' | head -n 1 | awk '{print $2}' | cut -d'/' -f2 | cut -d' ' -f1)
+          echo "Setting default GPG key: $DEFAULT_KEY"
+          echo "default-key $DEFAULT_KEY" > ~/.gnupg/gpg.conf
+          cat ~/.gnupg/gpg.conf
+          
+          # 再次检查默认密钥
+          echo "=== Default GPG Key ==="
+          gpg --list-secret-keys --keyid-format LONG | grep -A 2 '^sec'
 
       - name: Build and test
         run: mvn clean verify -B
