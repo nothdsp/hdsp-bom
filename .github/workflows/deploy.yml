@@ -19,6 +19,8 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
           server-id: central
+          server-username: ${{ secrets.SERVER_USERNAME }}
+          server-password: ${{ secrets.SERVER_PASSWORD }}
 
       - name: Import GPG Private Key
         env:
